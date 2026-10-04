@@ -1,16 +1,14 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { PrismaAdapter } from '@auth/prisma-adapter';
 import bcrypt from 'bcryptjs';
 import { db } from './db';
 import { signInSchema } from './validators';
 import type { Role } from '@prisma/client';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(db),
   session: { strategy: 'jwt', maxAge: 30 * 24 * 60 * 60 },
   trustHost: true,
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'e9a3b68452ef61d02c5f17849e7b4129e9a3b68452ef61d0',
   pages: {
     signIn: '/sign-in',
     error: '/sign-in',

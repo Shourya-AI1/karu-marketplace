@@ -18,18 +18,23 @@ export default function SignInPage() {
     e.preventDefault();
     setLoading(true);
     const form = new FormData(e.currentTarget);
-    const res = await signIn('credentials', {
-      email: form.get('email'),
-      password: form.get('password'),
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.error) {
-      toast.error('Invalid email or password.');
-    } else {
-      toast.success('Welcome back to Karu.');
-      router.push(params.get('callbackUrl') ?? '/');
-      router.refresh();
+    try {
+      const res = await signIn('credentials', {
+        email: form.get('email'),
+        password: form.get('password'),
+        redirect: false,
+      });
+      setLoading(false);
+      if (res?.error) {
+        toast.error('Invalid email or password.');
+      } else {
+        toast.success('Welcome back to Karu.');
+        router.push(params.get('callbackUrl') ?? '/');
+        router.refresh();
+      }
+    } catch {
+      setLoading(false);
+      toast.error('An error occurred during sign in.');
     }
   }
 
