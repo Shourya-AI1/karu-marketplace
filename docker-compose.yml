@@ -1,0 +1,56 @@
+# Karu — local production-like stack with Postgres + Redis.
+# For zero-config dev the app also runs against SQLite (DATABASE_URL="file:./dev.db").
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: karu
+      POSTGRES_PASSWORD: karu_dev_password
+      POSTGRES_DB: karu
+    ports:
+      - '5432:5432'
+    volumes:
+      - karu_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U karu']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: 'postgresql://karu:karu_dev_password@db:5432/karu?schema=public'
+      REDIS_URL: 'redis://redis:6379'
+      AUTH_SECRET: 'change-me-in-production'
+      NEXT_PUBLIC_APP_URL: 'http://localhost:3000'
+      NEXT_PUBLIC_APP_NAME: 'Karu'
+      NEXT_PUBLIC_ENABLE_3D: 'true'
+      NEXT_PUBLIC_ENABLE_AUDIO: 'true'
+    ports:
+      - '3000:3000'
+
+volumes:
+  karu_pgdata:

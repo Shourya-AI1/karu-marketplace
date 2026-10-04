@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.github
+npm-debug.log
+*.log
+.env*.local
+.DS_Store
+coverage
+playwright-report
+test-results
+tests/e2e
+*.tar.gz
+README.md
+dev.db
+dev.db-journal
+.wrangler
